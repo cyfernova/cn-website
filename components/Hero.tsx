@@ -4,7 +4,6 @@ import { gsap } from "gsap";
 import Link from "next/link";
 import { useCallback, useEffect, useRef } from "react";
 
-// Preload critical images
 if (typeof window !== "undefined") {
   const img1 = new Image();
   img1.src = "/cyfernova.svg";
@@ -12,7 +11,6 @@ if (typeof window !== "undefined") {
   img2.src = "/testimonial.svg";
 }
 
-// Base grid used for large screens; smaller breakpoints override via getGridConfig
 const DEFAULT_ROWS = 6;
 const DEFAULT_COLS = 6;
 const BLOCK_SIZE = 50;
@@ -31,14 +29,13 @@ export default function TileBoard() {
     if (typeof window === "undefined")
       return { rows: DEFAULT_ROWS, cols: DEFAULT_COLS };
     const w = window.innerWidth;
-    // Simple responsive breakpoints; adjust to match desired tile structure
+
     if (w <= 420) return { rows: 6, cols: 3 };
     if (w <= 640) return { rows: 6, cols: 4 };
     if (w <= 820) return { rows: 6, cols: 5 };
     return { rows: DEFAULT_ROWS, cols: DEFAULT_COLS };
   }, []);
 
-  // Function declarations
   const createTile = useCallback(
     (row: number, col: number, rows: number, cols: number): HTMLDivElement => {
       const tile = document.createElement("div");
@@ -172,7 +169,6 @@ export default function TileBoard() {
     const numRows = Math.ceil(screenHeight / BLOCK_SIZE);
     const numBlocks = numCols * numRows;
 
-    // Use DocumentFragment for better performance
     const fragment = document.createDocumentFragment();
 
     for (let i = 0; i < numBlocks; i++) {
@@ -200,7 +196,6 @@ export default function TileBoard() {
     const block = blocksRef.current.children[index] as HTMLElement;
 
     if (block) {
-      // Use requestAnimationFrame for better performance
       requestAnimationFrame(() => {
         block.classList.add("border-white");
         setTimeout(() => {
@@ -216,7 +211,6 @@ export default function TileBoard() {
     createBoard();
     createBlocks();
 
-    // Throttle mouse move event for better performance
     let rafId: number | null = null;
     const handleMouseMove = (event: MouseEvent) => {
       if (rafId) return;
@@ -229,7 +223,6 @@ export default function TileBoard() {
 
     document.addEventListener("mousemove", handleMouseMove, { passive: true });
 
-    // Debounced resize to rebuild grid when breakpoint changes
     let resizeTimeout: number | null = null;
     const handleResize = () => {
       if (resizeTimeout) window.clearTimeout(resizeTimeout);
@@ -260,7 +253,6 @@ export default function TileBoard() {
         <Link
           href="/"
           className="text-white text-3xl font-bold pointer-events-auto hover:opacity-80 transition-opacity"
-          style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}
         >
           CyferNova
         </Link>
@@ -268,7 +260,6 @@ export default function TileBoard() {
           type="button"
           onClick={flipAllTiles}
           className="border-none outline-none text-white bg-black rounded px-4 py-2 uppercase text-xl pointer-events-auto hover:bg-gray-900 transition-colors"
-          style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}
         >
           Flip Tiles
         </button>

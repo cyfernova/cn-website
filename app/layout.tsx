@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Montserrat } from "next/font/google";
+import TransitionOverlay from "@/components/TransitionOverlay";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,6 +15,14 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
   display: "swap",
   preload: true,
+});
+
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
+  subsets: ["latin"],
+  display: "swap",
+  preload: true,
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata: Metadata = {
@@ -109,9 +118,11 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} antialiased`}
       >
         {children}
+        {/* Transition overlay mounted globally so it runs across routes */}
+        <TransitionOverlay />
       </body>
     </html>
   );
