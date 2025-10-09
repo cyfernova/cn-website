@@ -4,6 +4,14 @@ import { gsap } from "gsap";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+// Preload critical images
+if (typeof window !== "undefined") {
+  const img1 = new Image();
+  img1.src = "/cyfernova.png";
+  const img2 = new Image();
+  img2.src = "/testimonial.png";
+}
+
 const ROWS = 6;
 const COLS = 6;
 const BLOCK_SIZE = 50;
@@ -96,6 +104,9 @@ export default function TileBoard() {
 
     boardRef.current.innerHTML = "";
 
+    // Use DocumentFragment for better performance
+    const fragment = document.createDocumentFragment();
+
     for (let i = 0; i < ROWS; i++) {
       const row = document.createElement("div");
       row.className = "flex-1 flex gap-1";
@@ -105,9 +116,10 @@ export default function TileBoard() {
         row.appendChild(tile);
       }
 
-      boardRef.current.appendChild(row);
+      fragment.appendChild(row);
     }
 
+    boardRef.current.appendChild(fragment);
     initializeTileAnimations();
   }, [createTile, initializeTileAnimations]);
 
@@ -140,14 +152,18 @@ export default function TileBoard() {
     const numRows = Math.ceil(screenHeight / BLOCK_SIZE);
     const numBlocks = numCols * numRows;
 
+    // Use DocumentFragment for better performance
+    const fragment = document.createDocumentFragment();
+
     for (let i = 0; i < numBlocks; i++) {
       const block = document.createElement("div");
       block.className =
         "w-[50px] h-[50px] border border-transparent transition-colors duration-300";
       block.dataset.index = String(i);
-      blocksRef.current.appendChild(block);
+      fragment.appendChild(block);
     }
 
+    blocksRef.current.appendChild(fragment);
     blockInfoRef.current = { numCols, numBlocks };
   }, []);
 
@@ -164,10 +180,15 @@ export default function TileBoard() {
     const block = blocksRef.current.children[index] as HTMLElement;
 
     if (block) {
-      block.classList.add("border-white");
-      setTimeout(() => {
-        block.classList.remove("border-white");
-      }, 250);
+      // Use requestAnimationFrame for better performance
+      requestAnimationFrame(() => {
+        block.classList.add("border-white");
+        setTimeout(() => {
+          requestAnimationFrame(() => {
+            block.classList.remove("border-white");
+          });
+        }, 250);
+      });
     }
   }, []);
 
@@ -175,11 +196,22 @@ export default function TileBoard() {
     createBoard();
     createBlocks();
 
-    const handleMouseMove = (event: MouseEvent) => highlightBlock(event);
-    document.addEventListener("mousemove", handleMouseMove);
+    // Throttle mouse move event for better performance
+    let rafId: number | null = null;
+    const handleMouseMove = (event: MouseEvent) => {
+      if (rafId) return;
+
+      rafId = requestAnimationFrame(() => {
+        highlightBlock(event);
+        rafId = null;
+      });
+    };
+
+    document.addEventListener("mousemove", handleMouseMove, { passive: true });
 
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
+      if (rafId) cancelAnimationFrame(rafId);
     };
   }, [createBoard, createBlocks, highlightBlock]);
 
