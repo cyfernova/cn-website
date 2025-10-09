@@ -2,73 +2,91 @@
 
 import { gsap } from "gsap";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 // Preload critical images
 if (typeof window !== "undefined") {
   const img1 = new Image();
-  img1.src = "/cyfernova.png";
+  img1.src = "/cyfernova.svg";
   const img2 = new Image();
-  img2.src = "/testimonial.png";
+  img2.src = "/testimonial.svg";
 }
 
-const ROWS = 6;
-const COLS = 6;
+// Base grid used for large screens; smaller breakpoints override via getGridConfig
+const DEFAULT_ROWS = 6;
+const DEFAULT_COLS = 6;
 const BLOCK_SIZE = 50;
 const COOLDOWN = 1000;
 
 export default function TileBoard() {
   const boardRef = useRef<HTMLDivElement>(null);
   const blocksRef = useRef<HTMLDivElement>(null);
-  const [isFlipped, setIsFlipped] = useState(false);
+  const isFlippedRef = useRef(false);
   const blockInfoRef = useRef<{ numCols: number; numBlocks: number } | null>(
     null,
   );
+  const gridRef = useRef<{ rows: number; cols: number } | null>(null);
 
-  // Function declarations
-  const createTile = useCallback((row: number, col: number): HTMLDivElement => {
-    const tile = document.createElement("div");
-    tile.className = "tile flex-1 relative";
-    tile.style.transformStyle = "preserve-3d";
-
-    const bgPosition = `${col * 20}% ${row * 20}%`;
-
-    tile.innerHTML = `
-      <div class="tile-face tile-front absolute w-full h-full rounded-lg overflow-hidden" style="backface-visibility: hidden; background-color: #2f4f4f; background-position: ${bgPosition}"></div>
-      <div class="tile-face tile-back absolute w-full h-full rounded-lg overflow-hidden" style="backface-visibility: hidden; background-color: #483d8b; transform: rotateX(180deg); background-position: ${bgPosition}"></div>
-    `;
-
-    return tile;
+  const getGridConfig = useCallback((): { rows: number; cols: number } => {
+    if (typeof window === "undefined")
+      return { rows: DEFAULT_ROWS, cols: DEFAULT_COLS };
+    const w = window.innerWidth;
+    // Simple responsive breakpoints; adjust to match desired tile structure
+    if (w <= 420) return { rows: 6, cols: 3 };
+    if (w <= 640) return { rows: 6, cols: 4 };
+    if (w <= 820) return { rows: 6, cols: 5 };
+    return { rows: DEFAULT_ROWS, cols: DEFAULT_COLS };
   }, []);
 
-  const animateTile = useCallback(
-    (tile: HTMLElement, tilety: number) => {
-      gsap
-        .timeline()
-        .set(tile, { rotateX: isFlipped ? 180 : 0, rotateY: 0 })
-        .to(tile, {
-          rotateX: isFlipped ? 450 : 270,
-          rotateY: tilety,
+  // Function declarations
+  const createTile = useCallback(
+    (row: number, col: number, rows: number, cols: number): HTMLDivElement => {
+      const tile = document.createElement("div");
+      tile.className = "tile flex-1 relative";
+      tile.style.transformStyle = "preserve-3d";
+
+      const posX = cols > 1 ? (col / (cols - 1)) * 100 : 0;
+      const posY = rows > 1 ? (row / (rows - 1)) * 100 : 0;
+      const bgSizeX = `${cols * 100}%`;
+      const bgSizeY = `${rows * 100}%`;
+
+      tile.innerHTML = `
+      <div class="tile-face tile-front absolute w-full h-full rounded-lg overflow-hidden" style="backface-visibility: hidden; background-color: #2f4f4f; --bg-size-x: ${bgSizeX}; --bg-size-y: ${bgSizeY}; --bg-pos-x: ${posX}%; --bg-pos-y: ${posY}%"></div>
+      <div class="tile-face tile-back absolute w-full h-full rounded-lg overflow-hidden" style="backface-visibility: hidden; background-color: #483d8b; transform: rotateX(180deg); --bg-size-x: ${bgSizeX}; --bg-size-y: ${bgSizeY}; --bg-pos-x: ${posX}%; --bg-pos-y: ${posY}%"></div>
+    `;
+
+      return tile;
+    },
+    [],
+  );
+
+  const animateTile = useCallback((tile: HTMLElement, tilety: number) => {
+    const isFlipped = isFlippedRef.current;
+    gsap
+      .timeline()
+      .set(tile, { rotateX: isFlipped ? 180 : 0, rotateY: 0 })
+      .to(tile, {
+        rotateX: isFlipped ? 450 : 270,
+        rotateY: tilety,
+        duration: 0.5,
+        ease: "power2.out",
+      })
+      .to(
+        tile,
+        {
+          rotateX: isFlipped ? 540 : 360,
+          rotateY: 0,
           duration: 0.5,
           ease: "power2.out",
-        })
-        .to(
-          tile,
-          {
-            rotateX: isFlipped ? 540 : 360,
-            rotateY: 0,
-            duration: 0.5,
-            ease: "power2.out",
-          },
-          "-=0.25",
-        );
-    },
-    [isFlipped],
-  );
+        },
+        "-=0.25",
+      );
+  }, []);
 
   const initializeTileAnimations = useCallback(() => {
     const tiles = boardRef.current?.querySelectorAll(".tile");
     if (!tiles) return;
+    const numCols = gridRef.current?.cols ?? DEFAULT_COLS;
 
     tiles.forEach((tile, index) => {
       let lastEnterTime = 0;
@@ -78,16 +96,17 @@ export default function TileBoard() {
         if (currentTime - lastEnterTime > COOLDOWN) {
           lastEnterTime = currentTime;
 
+          const colIndex = index % numCols;
           let tilety: number;
-          if (index % 6 === 0) {
+          if (colIndex === 0) {
             tilety = -40;
-          } else if (index % 6 === 5) {
+          } else if (colIndex === numCols - 1) {
             tilety = 40;
-          } else if (index % 6 === 1) {
+          } else if (colIndex === 1) {
             tilety = -20;
-          } else if (index % 6 === 4) {
+          } else if (colIndex === numCols - 2) {
             tilety = 20;
-          } else if (index % 6 === 2) {
+          } else if (colIndex === 2) {
             tilety = -10;
           } else {
             tilety = 10;
@@ -101,18 +120,19 @@ export default function TileBoard() {
 
   const createBoard = useCallback(() => {
     if (!boardRef.current) return;
-
+    const { rows, cols } = getGridConfig();
+    gridRef.current = { rows, cols };
     boardRef.current.innerHTML = "";
 
     // Use DocumentFragment for better performance
     const fragment = document.createDocumentFragment();
 
-    for (let i = 0; i < ROWS; i++) {
+    for (let i = 0; i < rows; i++) {
       const row = document.createElement("div");
       row.className = "flex-1 flex gap-1";
 
-      for (let j = 0; j < COLS; j++) {
-        const tile = createTile(i, j);
+      for (let j = 0; j < cols; j++) {
+        const tile = createTile(i, j, rows, cols);
         row.appendChild(tile);
       }
 
@@ -121,17 +141,17 @@ export default function TileBoard() {
 
     boardRef.current.appendChild(fragment);
     initializeTileAnimations();
-  }, [createTile, initializeTileAnimations]);
+  }, [createTile, initializeTileAnimations, getGridConfig]);
 
-  const flipAllTiles = () => {
+  const flipAllTiles = useCallback(() => {
     const tiles = boardRef.current?.querySelectorAll(".tile");
     if (!tiles) return;
 
-    const newFlipped = !isFlipped;
-    setIsFlipped(newFlipped);
+    isFlippedRef.current = !isFlippedRef.current;
+    const isFlipped = isFlippedRef.current;
 
     gsap.to(tiles, {
-      rotateX: newFlipped ? 180 : 0,
+      rotateX: isFlipped ? 180 : 0,
       duration: 1,
       stagger: {
         amount: 0.5,
@@ -139,7 +159,7 @@ export default function TileBoard() {
       },
       ease: "power2.inOut",
     });
-  };
+  }, []);
 
   const createBlocks = useCallback(() => {
     if (!blocksRef.current) return;
@@ -209,11 +229,30 @@ export default function TileBoard() {
 
     document.addEventListener("mousemove", handleMouseMove, { passive: true });
 
+    // Debounced resize to rebuild grid when breakpoint changes
+    let resizeTimeout: number | null = null;
+    const handleResize = () => {
+      if (resizeTimeout) window.clearTimeout(resizeTimeout);
+      resizeTimeout = window.setTimeout(() => {
+        const next = getGridConfig();
+        const current = gridRef.current;
+        if (
+          !current ||
+          current.rows !== next.rows ||
+          current.cols !== next.cols
+        ) {
+          createBoard();
+        }
+      }, 150);
+    };
+    window.addEventListener("resize", handleResize);
+
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       if (rafId) cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", handleResize);
     };
-  }, [createBoard, createBlocks, highlightBlock]);
+  }, [createBoard, createBlocks, highlightBlock, getGridConfig]);
 
   return (
     <main className="relative w-screen h-screen overflow-hidden">
@@ -257,17 +296,17 @@ export default function TileBoard() {
           left: 0;
           right: 0;
           bottom: 0;
-          background-size: 600% 600%;
-          background-position: inherit;
+          background-size: var(--bg-size-x, 600%) var(--bg-size-y, 600%);
+          background-position: var(--bg-pos-x, 0%) var(--bg-pos-y, 0%);
           clip-path: inset(0 round 0.25em);
         }
         
         .tile-front::before {
-          background-image: url('/cyfernova.png');
+          background-image: url('/cyfernova.svg');
         }
         
         .tile-back::before {
-          background-image: url('/testimonial.png');
+          background-image: url('/testimonial.svg');
         }
       `}</style>
     </main>
