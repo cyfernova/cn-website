@@ -25,6 +25,16 @@ body {
   font-family: var(--font-montserrat), system-ui, -apple-system, sans-serif;
 }
 
+/* Hide hero UI when the menu is open */
+.hero-root {
+  transition: opacity 0.5s ease;
+}
+
+.menu-open .hero-root {
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* Page transition overlay (GSAP) */
 .transition {
   position: fixed;
@@ -43,17 +53,17 @@ body {
   display: flex;
 }
 
+.block {
+  flex: 1;
+  background-color: #000;
+  transform: scaleY(1);
+  will-change: transform;
+}
+
 .row-1 .block {
   transform-origin: top;
 }
 
 .row-2 .block {
   transform-origin: bottom;
-}
-
-.block {
-  flex: 1;
-  background-color: #000;
-  transform: scaleY(1);
-  will-change: transform;
 }
