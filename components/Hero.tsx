@@ -52,10 +52,19 @@ export default function TileBoard() {
             const bgSizeX = `${cols * 100}%`;
             const bgSizeY = `${rows * 100}%`;
 
-            tile.innerHTML = `
-      <div class="tile-face tile-front absolute w-full h-full rounded-lg overflow-hidden" style="backface-visibility: hidden; background-color: #2f4f4f; --bg-size-x: ${bgSizeX}; --bg-size-y: ${bgSizeY}; --bg-pos-x: ${posX}%; --bg-pos-y: ${posY}%"></div>
-      <div class="tile-face tile-back absolute w-full h-full rounded-lg overflow-hidden" style="backface-visibility: hidden; background-color: #483d8b; transform: rotateX(180deg); --bg-size-x: ${bgSizeX}; --bg-size-y: ${bgSizeY}; --bg-pos-x: ${posX}%; --bg-pos-y: ${posY}%"></div>
-    `;
+            // Create tile faces using DOM methods instead of innerHTML
+            const tileFront = document.createElement("div");
+            tileFront.className =
+                "tile-face tile-front absolute w-full h-full rounded-lg overflow-hidden";
+            tileFront.style.cssText = `backface-visibility: hidden; background-color: #2f4f4f; --bg-size-x: ${bgSizeX}; --bg-size-y: ${bgSizeY}; --bg-pos-x: ${posX}%; --bg-pos-y: ${posY}%`;
+
+            const tileBack = document.createElement("div");
+            tileBack.className =
+                "tile-face tile-back absolute w-full h-full rounded-lg overflow-hidden";
+            tileBack.style.cssText = `backface-visibility: hidden; background-color: #483d8b; transform: rotateX(180deg); --bg-size-x: ${bgSizeX}; --bg-size-y: ${bgSizeY}; --bg-pos-x: ${posX}%; --bg-pos-y: ${posY}%`;
+
+            tile.appendChild(tileFront);
+            tile.appendChild(tileBack);
 
             return tile;
         },
@@ -123,7 +132,11 @@ export default function TileBoard() {
         if (!boardRef.current) return;
         const { rows, cols } = getGridConfig();
         gridRef.current = { rows, cols };
-        boardRef.current.innerHTML = "";
+
+        // Clear children properly to avoid hydration issues
+        while (boardRef.current.firstChild) {
+            boardRef.current.removeChild(boardRef.current.firstChild);
+        }
 
         // Use DocumentFragment for better performance
         const fragment = document.createDocumentFragment();
@@ -165,7 +178,10 @@ export default function TileBoard() {
     const createBlocks = useCallback(() => {
         if (!blocksRef.current) return;
 
-        blocksRef.current.innerHTML = "";
+        // Clear children properly to avoid hydration issues
+        while (blocksRef.current.firstChild) {
+            blocksRef.current.removeChild(blocksRef.current.firstChild);
+        }
 
         const screenWidth = window.innerWidth;
         const screenHeight = window.innerHeight;
@@ -275,12 +291,14 @@ export default function TileBoard() {
                 ref={boardRef}
                 className="w-screen h-screen p-1 flex flex-col gap-1 bg-black relative z-[1]"
                 style={{ perspective: "1000px" }}
+                suppressHydrationWarning
             ></div>
 
             <div className="fixed top-0 left-0 w-screen h-screen overflow-hidden pointer-events-none z-[2]">
                 <div
                     ref={blocksRef}
                     className="w-[105vw] h-screen flex flex-wrap justify-start content-start overflow-hidden"
+                    suppressHydrationWarning
                 ></div>
             </div>
 

@@ -15,13 +15,14 @@ export default function Menu() {
             const elements = document.querySelectorAll(selector);
             elements.forEach((element) => {
                 const text = element.textContent || "";
-                const splitText = text
-                    .split("")
-                    .map((char) => {
-                        return `<span>${char === " " ? "&nbsp;&nbsp;" : char}</span>`;
-                    })
-                    .join("");
-                element.innerHTML = splitText;
+                // Clear the element first to avoid hydration mismatch
+                element.textContent = "";
+                // Create spans as DOM nodes instead of using innerHTML
+                text.split("").forEach((char) => {
+                    const span = document.createElement("span");
+                    span.textContent = char === " " ? "\u00A0\u00A0" : char;
+                    element.appendChild(span);
+                });
             });
         };
 
@@ -200,7 +201,7 @@ export default function Menu() {
                         </div>
                     </div>
                     <div className="header">
-                        <h1>Cyfernova</h1>
+                        <h1 suppressHydrationWarning={true}>Cyfernova</h1>
                     </div>
                 </div>
             </div>
