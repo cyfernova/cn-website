@@ -159,14 +159,10 @@ export default function Menu() {
                                 Projects
                             </a>
                         </div>
+
                         <div className="menu-link">
-                            <a href="/expertise" className="href">
-                                Expertise
-                            </a>
-                        </div>
-                        <div className="menu-link">
-                            <a href="/agency" className="href">
-                                Agency
+                            <a href="/about" className="href">
+                                About
                             </a>
                         </div>
                         <div className="menu-link">

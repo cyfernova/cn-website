@@ -1,3 +1,9 @@
+.menu-open,
+html.menu-open,
+body.menu-open {
+    overflow: hidden !important;
+}
+
 .menu-logo {
     color: white;
     text-transform: uppercase;
@@ -87,7 +93,8 @@
     transition: all 1s cubic-bezier(0.075, 0.82, 0.165, 1);
 }
 
-.menu-toggle:hover .hamburger, .menu-toggle.opened .hamburger {
+.menu-toggle:hover .hamburger,
+.menu-toggle.opened .hamburger {
     top: 50%;
     opacity: 1;
 }
@@ -188,11 +195,11 @@
 
 .video-wrapper {
     width: 100%;
+    aspect-ratio: 16 / 9;
     background-color: transparent;
     overflow: hidden;
     padding: 1em;
     border-radius: 0.75rem;
-    aspect-ratio: 16/9;
     clip-path: polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%);
     border: 2px solid rgba(255, 255, 255, 0.2);
 }
@@ -319,4 +326,3 @@
         padding-left: 0;
     }
 }
-

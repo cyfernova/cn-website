@@ -8,7 +8,7 @@ if (typeof window !== "undefined") {
     const img1 = new Image();
     img1.src = "/cyfernova.svg";
     const img2 = new Image();
-    img2.src = "/testimonial.svg";
+    img2.src = "/white.png";
 }
 
 const DEFAULT_ROWS = 6;
@@ -321,7 +321,7 @@ export default function TileBoard() {
         }
         
         .tile-back::before {
-          background-image: url('/testimonial.svg');
+          background-image: url('/white.png');
         }
       `}</style>
         </main>

@@ -1,69 +1,69 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+    --background: #ffffff;
+    --foreground: #171717;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-montserrat);
-  --font-mono: var(--font-geist-mono);
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --font-sans: var(--font-montserrat);
+    --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+    :root {
+        --background: #0a0a0a;
+        --foreground: #ededed;
+    }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-montserrat), system-ui, -apple-system, sans-serif;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-montserrat), system-ui, -apple-system, sans-serif;
 }
 
 /* Hide hero UI when the menu is open */
 .hero-root {
-  transition: opacity 0.5s ease;
+    transition: opacity 0.5s ease;
 }
 
 .menu-open .hero-root {
-  opacity: 0;
-  pointer-events: none;
+    opacity: 0;
+    pointer-events: none;
 }
 
 /* Page transition overlay (GSAP) */
 .transition {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  z-index: 9999;
-  pointer-events: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    z-index: 9999;
+    pointer-events: none;
 }
 
 .transition-row {
-  flex: 1;
-  display: flex;
+    flex: 1;
+    display: flex;
 }
 
 .block {
-  flex: 1;
-  background-color: #000;
-  transform: scaleY(1);
-  will-change: transform;
+    flex: 1;
+    background-color: #000;
+    transform: scaleY(1);
+    will-change: transform;
 }
 
 .row-1 .block {
-  transform-origin: top;
+    transform-origin: top;
 }
 
 .row-2 .block {
-  transform-origin: bottom;
+    transform-origin: bottom;
 }
